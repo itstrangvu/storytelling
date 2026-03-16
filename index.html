@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Art of Telling the Story</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream:  #F7F2E8;
+  --ink:    #1A1714;
+  --coral:  #D85A30;
+  --teal:   #0F6E56;
+  --purple: #4A3FA0;
+  --amber:  #BA7517;
+  --pink:   #993556;
+  --blue:   #185FA5;
+  --serif:  'Playfair Display', Georgia, serif;
+  --sans:   'DM Sans', system-ui, sans-serif;
+  --mono:   'DM Mono', monospace;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* PROGRESS */
+#progress-bar {
+  position: fixed; top: 0; left: 0;
+  height: 3px; background: var(--coral);
+  width: 0%; z-index: 999;
+}
+
+/* NAV DOTS */
+#chapter-nav {
+  position: fixed; right: 20px; top: 50%;
+  transform: translateY(-50%);
+  z-index: 200;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.nav-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(26,23,20,0.18);
+  cursor: pointer; transition: all 0.3s; position: relative;
+}
+.nav-dot.active { background: var(--coral); transform: scale(1.5); }
+.nav-dot:hover  { background: var(--ink); }
+.nav-dot::before {
+  content: attr(data-label);
+  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+  font-family: var(--mono); font-size: 9px; white-space: nowrap;
+  color: var(--ink); opacity: 0; transition: opacity 0.2s;
+  background: var(--cream); padding: 2px 6px; border-radius: 3px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.nav-dot:hover::before { opacity: 1; }
+
+/* HERO */
+#hero {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 80px 40px;
+  background: var(--ink); overflow: hidden; position: relative;
+}
+.hero-ring {
+  position: absolute; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.05);
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+}
+.hero-tag {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--coral);
+  margin-bottom: 28px; opacity: 0; position: relative; z-index: 1;
+}
+.hero-title {
+  font-family: var(--serif); font-size: clamp(52px,9vw,110px);
+  font-weight: 900; line-height: 0.93; color: var(--cream);
+  margin-bottom: 28px; opacity: 0; transform: translateY(24px);
+  position: relative; z-index: 1;
+}
+.hero-title em { font-style: italic; color: var(--coral); }
+.hero-sub {
+  font-size: 15px; color: rgba(247,242,232,0.45);
+  max-width: 380px; opacity: 0; margin-bottom: 52px;
+  font-weight: 300; line-height: 1.75; position: relative; z-index: 1;
+}
+.hero-scroll-hint {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: rgba(247,242,232,0.25);
+  opacity: 0; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  position: relative; z-index: 1;
+}
+.scroll-ticker {
+  width: 1px; height: 52px; background: rgba(255,255,255,0.1);
+  position: relative; overflow: hidden;
+}
+.scroll-ticker::after {
+  content: ''; position: absolute; top: -100%; left: 0;
+  width: 1px; height: 100%; background: var(--coral);
+  animation: tick 1.9s ease infinite;
+}
+@keyframes tick { 0%{top:-100%} 100%{top:200%} }
+
+/* ═══════════════════════════════════════
+   CHAPTER OVERVIEW — STATIC CARD GRID
+═══════════════════════════════════════ */
+#overview {
+  background: var(--ink);
+  padding: 80px 60px 100px;
+}
+.overview-header {
+  margin-bottom: 52px;
+  opacity: 0;
+  transform: translateY(16px);
+}
+.overview-header-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--coral);
+  margin-bottom: 10px;
+}
+.overview-header-title {
+  font-family: var(--serif);
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 700;
+  color: var(--cream);
+  line-height: 1.05;
+}
+.overview-header-title em { font-style: italic; color: var(--coral); }
+
+/* Card grid */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+/* Individual compact card */
+.chapter-card {
+  border-radius: 14px;
+  padding: 24px 22px 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 2 / 3;
+  opacity: 0;
+  transform: translateY(24px);
+}
+.chapter-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.1);
+  pointer-events: none;
+}
+
+.chapter-card:nth-child(1) { background: #D85A30; }
+.chapter-card:nth-child(2) { background: #4A3FA0; }
+.chapter-card:nth-child(3) { background: #0F6E56; }
+.chapter-card:nth-child(4) { background: #BA7517; }
+.chapter-card:nth-child(5) { background: #993556; }
+.chapter-card:nth-child(6) { background: #2e2b28; }
+
+.card-num {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 12px;
+}
+.card-title {
+  font-family: var(--serif);
+  font-size: clamp(18px, 2vw, 26px);
+  font-weight: 900;
+  line-height: 0.98;
+  color: white;
+}
+.card-title em {
+  font-style: italic;
+  opacity: 0.65;
+  display: block;
+  font-size: 0.72em;
+  margin-top: 4px;
+}
+
+/* Big background number */
+.card-bg-num {
+  position: absolute;
+  bottom: -14px;
+  right: -6px;
+  font-family: var(--serif);
+  font-size: 100px;
+  font-weight: 900;
+  font-style: italic;
+  color: rgba(255,255,255,0.06);
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* INTERLUDE */
+.interlude {
+  padding: 80px 48px; text-align: center;
+  overflow: hidden; position: relative;
+}
+.int-num {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: rgba(255,255,255,0.4);
+  margin-bottom: 14px; opacity: 0;
+}
+.int-word {
+  font-family: var(--serif); font-size: clamp(64px,14vw,148px);
+  font-weight: 900; line-height: 0.9; color: white;
+  opacity: 0; transform: translateY(28px);
+}
+.int-sub {
+  font-size: 14px; color: rgba(255,255,255,0.5); margin-top: 20px;
+  font-weight: 300; max-width: 320px; margin-left: auto; margin-right: auto; opacity: 0;
+}
+
+/* ═══════════════════════════════════════════════════
+   SCROLLYTELLING — 12-col grid
+   col 1–4  : sticky section title
+   col 5–8  : point content (full-vh per point)
+   col 9–12 : visual placeholder
+═══════════════════════════════════════════════════ */
+
+/* Outer section wrapper */
+.scroll-section {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  position: relative;
+}
+
+/* ── COL 1–4 : sticky title ── */
+.sticky-col {
+  grid-column: 1 / 5;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 48px 32px 48px 60px;
+  z-index: 10;
+  border-right: 1px solid rgba(26,23,20,0.06);
+}
+.sticky-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--sec-color, var(--coral));
+  margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
+}
+.sticky-label::after {
+  content: ''; width: 28px; height: 1px;
+  background: var(--sec-color, var(--coral)); opacity: 0.5;
+}
+.sticky-heading {
+  font-family: var(--serif); font-size: clamp(30px, 3.2vw, 50px);
+  font-weight: 700; line-height: 1.06; color: var(--ink);
+}
+.sticky-heading em { font-style: italic; color: var(--sec-color, var(--coral)); }
+.sticky-meta { margin-top: 32px; display: flex; flex-direction: column; gap: 8px; }
+.sticky-counter {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+  color: rgba(26,23,20,0.22);
+}
+.progress-track {
+  width: 44px; height: 2px; background: rgba(26,23,20,0.1);
+  border-radius: 1px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; background: var(--sec-color, var(--coral));
+  width: 0%; border-radius: 1px; transition: width 0.35s ease;
+}
+
+/* ── COL 5–12 : rows container ── */
+.items-col {
+  grid-column: 5 / 13;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Single point row (full viewport height) ── */
+.scroll-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* content | visual */
+  min-height: 100vh;
+  opacity: 0;
+  transform: translateY(48px);
+  border-bottom: 1px solid rgba(26,23,20,0.07);
+  position: relative;
+}
+.scroll-item:last-child { border-bottom: none; }
+
+/* ── Content half (col 5–8 effectively) ── */
+.item-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 48px 60px 48px;
+  border-right: 1px solid rgba(26,23,20,0.06);
+}
+.item-tag {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--sec-color, var(--coral));
+  margin-bottom: 14px;
+}
+.item-title {
+  font-family: var(--serif); font-size: clamp(22px, 2.4vw, 32px);
+  font-weight: 700; line-height: 1.1; margin-bottom: 16px; color: var(--ink);
+}
+.item-body {
+  font-size: 14px; color: #5c5854; line-height: 1.85;
+}
+
+/* Quote variant */
+.scroll-item.is-quote .item-title {
+  font-style: italic; font-weight: 400;
+  font-size: clamp(20px, 2.6vw, 30px); line-height: 1.3;
+  border-left: 3px solid var(--sec-color, var(--coral));
+  padding-left: 24px;
+}
+.scroll-item.is-quote .item-body { padding-left: 27px; }
+
+/* ── Visual half (col 9–12 effectively) ── */
+.item-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px;
+  background: rgba(26,23,20,0.025);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Visual placeholder card */
+.visual-placeholder {
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 3/4;
+  border-radius: 16px;
+  background: white;
+  border: 1px solid rgba(26,23,20,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: scale(0.92);
+}
+.visual-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--sec-color, var(--coral)) 0%, transparent 60%);
+  opacity: 0.06;
+}
+.visual-id {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sec-color, var(--coral));
+  position: relative;
+  z-index: 1;
+}
+.visual-label {
+  font-family: var(--serif);
+  font-size: 13px;
+  font-style: italic;
+  color: rgba(26,23,20,0.35);
+  text-align: center;
+  padding: 0 16px;
+  line-height: 1.4;
+  position: relative;
+  z-index: 1;
+}
+.visual-icon {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--sec-color, var(--coral));
+  opacity: 0.12;
+  position: relative;
+  z-index: 1;
+}
+/* Corner tag */
+.visual-placeholder::after {
+  content: attr(data-id);
+  position: absolute;
+  bottom: 12px; right: 14px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: rgba(26,23,20,0.2);
+}
+
+/* Versus */
+.versus-wrap {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  border: 1px solid rgba(26,23,20,0.09); border-radius: 14px;
+  overflow: hidden; background: white; margin-top: 6px;
+}
+.vs-side { padding: 22px 20px; }
+.vs-lbl  {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.13em;
+  text-transform: uppercase; margin-bottom: 14px;
+}
+.vs-lbl.bad  { color: #aaa; }
+.vs-lbl.good { color: var(--teal); }
+.vs-divider-col {
+  width: 1px; background: rgba(26,23,20,0.08);
+  display: flex; align-items: center; padding: 0 14px;
+}
+.vs-divider-col span {
+  font-family: var(--mono); font-size: 9px; color: #ccc;
+  writing-mode: vertical-lr; letter-spacing: 0.1em;
+}
+.vs-list { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+.vs-list li {
+  font-size: 13px; color: #555; line-height: 1.5;
+  padding-left: 14px; position: relative;
+}
+.vs-list li::before { content: '—'; position: absolute; left: 0; color: #ccc; }
+.vs-list.good li::before { content: '✓'; color: var(--teal); }
+
+/* 5W1H grid */
+.fw-grid {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 8px; margin-top: 6px;
+}
+.fw-cell { background: white; border-radius: 10px; padding: 16px 14px; }
+.fw-letter {
+  font-family: var(--serif); font-size: 34px;
+  font-weight: 900; font-style: italic; line-height: 1; margin-bottom: 4px;
+}
+.fw-word { font-size: 13px; font-weight: 500; color: var(--ink); }
+.fw-hint { font-size: 11px; color: #999; margin-top: 2px; }
+
+/* Format toggle */
+.fmt-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.ftab {
+  padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: 500;
+  border: 1px solid rgba(26,23,20,0.15); cursor: pointer;
+  background: transparent; font-family: var(--sans); color: var(--ink);
+  transition: all 0.18s;
+}
+.ftab.active, .ftab:hover { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+.fmt-panel { display: none; }
+.fmt-panel.active { display: block; }
+.fmt-point {
+  display: flex; gap: 12px; padding: 11px 0;
+  border-bottom: 1px solid rgba(26,23,20,0.06); align-items: flex-start;
+}
+.fmt-point:last-child { border-bottom: none; }
+.fmt-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--sec-color, var(--coral));
+  flex-shrink: 0; margin-top: 8px;
+}
+.fmt-point-title { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+.fmt-point-body  { font-size: 13px; color: #666; line-height: 1.6; }
+
+/* Checklist */
+.checklist-wrap { display: flex; flex-direction: column; gap: 6px; }
+.check-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 13px 16px; background: white; border-radius: 9px;
+  cursor: pointer; transition: background 0.15s; user-select: none;
+}
+.check-item:hover { background: #f3efe8; }
+.check-item.done  { opacity: 0.42; }
+.check-box-el {
+  width: 17px; height: 17px; border-radius: 4px;
+  border: 1.5px solid rgba(26,23,20,0.2);
+  flex-shrink: 0; margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: transparent; transition: all 0.2s;
+}
+.check-item.done .check-box-el { background: var(--teal); border-color: var(--teal); color: white; }
+.check-text-label { font-size: 13px; font-weight: 500; color: var(--ink); line-height: 1.35; }
+.check-text-sub   { font-size: 11px; color: #999; margin-top: 2px; }
+
+/* CLOSE */
+#close {
+  background: var(--ink); color: var(--cream);
+  padding: 140px 60px; text-align: center;
+  position: relative; overflow: hidden;
+}
+.close-ring {
+  position: absolute; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.04);
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+}
+.close-title {
+  font-family: var(--serif); font-size: clamp(40px,8vw,90px);
+  font-weight: 900; line-height: 0.95;
+  position: relative; z-index: 1; opacity: 0; transform: translateY(32px);
+}
+.close-title em { color: var(--coral); font-style: italic; }
+.close-sub {
+  font-size: 15px; color: rgba(247,242,232,0.42);
+  max-width: 400px; margin: 24px auto 0;
+  opacity: 0; font-weight: 300; position: relative; z-index: 1;
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<nav id="chapter-nav">
+  <div class="nav-dot active" data-label="Intro"     data-target="hero"></div>
+  <div class="nav-dot"        data-label="Overview"  data-target="overview"></div>
+  <div class="nav-dot"        data-label="Yourself"  data-target="s-intro"></div>
+  <div class="nav-dot"        data-label="Audience"  data-target="s-audience"></div>
+  <div class="nav-dot"        data-label="Context"   data-target="s-frame"></div>
+  <div class="nav-dot"        data-label="Show it"   data-target="s-delivery"></div>
+  <div class="nav-dot"        data-label="Mood"      data-target="s-mood"></div>
+  <div class="nav-dot"        data-label="Checklist" data-target="s-checklist"></div>
+  <div class="nav-dot"        data-label="Close"     data-target="close"></div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-ring" style="width:480px;height:480px;"></div>
+  <div class="hero-ring" style="width:780px;height:780px;"></div>
+  <div class="hero-ring" style="width:1080px;height:1080px;"></div>
+  <div class="hero-tag">Knowledge sharing · Peer designers</div>
+  <h1 class="hero-title">The art of<br><em>telling<br>the story</em></h1>
+  <p class="hero-sub">Every design decision has a story. Let's learn how to tell it in a way that actually lands.</p>
+  <div class="hero-scroll-hint">
+    <span>Scroll to begin</span>
+    <div class="scroll-ticker"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════ CHAPTER OVERVIEW CARDS ═══════════════════ -->
+<section id="overview">
+  <div class="overview-header" id="overviewHeader">
+    <div class="overview-header-tag">What you'll learn</div>
+    <h2 class="overview-header-title">Five principles<br>of a <em>great story</em></h2>
+  </div>
+
+  <div class="cards-grid" id="cardsGrid">
+
+    <div class="chapter-card">
+      <div class="card-bg-num">1</div>
+      <div class="card-num">01 — Introduction</div>
+      <div class="card-title">Yourself<em>Who's telling it?</em></div>
+    </div>
+
+    <div class="chapter-card">
+      <div class="card-bg-num">2</div>
+      <div class="card-num">02 — Principle 01</div>
+      <div class="card-title">Audience<em>Who's listening?</em></div>
+    </div>
+
+    <div class="chapter-card">
+      <div class="card-bg-num">3</div>
+      <div class="card-num">03 — Principle 02</div>
+      <div class="card-title">Context<em>&amp; Scope</em></div>
+    </div>
+
+    <div class="chapter-card">
+      <div class="card-bg-num">4</div>
+      <div class="card-num">04 — Principle 03</div>
+      <div class="card-title">Show it<em>Don't just tell</em></div>
+    </div>
+
+    <div class="chapter-card">
+      <div class="card-bg-num">5</div>
+      <div class="card-num">05 — Principle 04</div>
+      <div class="card-title">Mood<em>Feel the room</em></div>
+    </div>
+
+    <div class="chapter-card">
+      <div class="card-bg-num">✓</div>
+      <div class="card-num">Pre-flight</div>
+      <div class="card-title">Checklist<em>Before you go live</em></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- INTERLUDE 1 -->
+<div class="interlude" style="background:#D85A30;">
+  <div class="int-num">01</div>
+  <div class="int-word">You</div>
+  <div class="int-sub">Before the story, there's a narrator. Start there.</div>
+</div>
+
+<!-- SECTION: INTRODUCE YOURSELF -->
+<section class="scroll-section" id="s-intro" style="--sec-color: var(--coral);">
+  <div class="sticky-col">
+    <div class="sticky-label">Introduction</div>
+    <h2 class="sticky-heading">Introduce<br><em>yourself</em><br>first</h2>
+    <div class="sticky-meta">
+      <div class="sticky-counter" id="ctr-intro">— / 4</div>
+      <div class="progress-track"><div class="progress-fill" id="pf-intro"></div></div>
+    </div>
+  </div>
+  <div class="items-col">
+
+    <div class="scroll-item" data-sec="intro" data-i="1">
+      <div class="item-content">
+        <div class="item-tag">Name + role</div>
+        <div class="item-title">One relevant detail</div>
+        <div class="item-body">Not your full résumé. Just enough to anchor where your perspective comes from. "I work on checkout flows and have shipped 3 redesigns in 2 years." Earn trust in the first 30 seconds.</div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s1p1">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s1p1</div>
+          <div class="visual-label">One relevant detail</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-item" data-sec="intro" data-i="2">
+      <div class="item-content">
+        <div class="item-tag">Connect</div>
+        <div class="item-title">Why do you care about this?</div>
+        <div class="item-body">Briefly explain why storytelling matters to you. It signals authenticity and frames everything coming next. Without it, you're just a voice delivering content — not a person with a point of view.</div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s1p2">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s1p2</div>
+          <div class="visual-label">Why you care</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-item" data-sec="intro" data-i="3">
+      <div class="item-content">
+        <div class="item-tag">Source</div>
+        <div class="item-title">Where does the story come from?</div>
+        <div class="item-body">Real projects. Lived experience. Things that worked — or didn't. Failure stories land harder than success stories. They're rarer, more honest, and people remember them longer.</div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s1p3">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s1p3</div>
+          <div class="visual-label">Where it comes from</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-item is-quote" data-sec="intro" data-i="4">
+      <div class="item-content">
+        <div class="item-title">"If they don't know you, they can't trust your story."</div>
+        <div class="item-body">This is the whole game before a single slide loads.</div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s1p4">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s1p4</div>
+          <div class="visual-label">Trust = story</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- INTERLUDE 2 -->
+<div class="interlude" style="background:#4A3FA0;">
+  <div class="int-num">02</div>
+  <div class="int-word">Them</div>
+  <div class="int-sub">Your story lives in their heads. Design for it.</div>
+</div>
+
+<!-- SECTION: AUDIENCE -->
+<section class="scroll-section" id="s-audience" style="--sec-color: var(--purple);">
+  <div class="sticky-col">
+    <div class="sticky-label">Principle 01</div>
+    <h2 class="sticky-heading">Think about<br><em>your</em><br><em>audience</em></h2>
+    <div class="sticky-meta">
+      <div class="sticky-counter" id="ctr-audience">— / 5</div>
+      <div class="progress-track"><div class="progress-fill" id="pf-audience"></div></div>
+    </div>
+  </div>
+  <div class="items-col">
+
+    <div class="scroll-item" data-sec="audience" data-i="1">
+      <div class="item-content">
+        <div class="item-tag">Background</div>
+        <div class="item-title">What do they already know?</div>
+        <div class="item-body">Their expertise shapes how deep you can go from slide one. Don't explain Figma components to a room of senior product designers — you'll lose them in the first minute.</div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s2p1">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s2p1</div>
+          <div class="visual-label">What they know</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-item" data-sec="audience" data-i="2">
+      <div class="item-content">
+        <div class="item-tag">References</div>
+        <div class="item-title">Who do they admire?</div>
+        <div class="item-body">"Similar to how Linear approaches motion..." or "Like what the Duolingo team does with empty states..." — abstract ideas become concrete fast when grounded in work they already love.</div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s2p2">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s2p2</div>
+          <div class="visual-label">Who they admire</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-item" data-sec="audience" data-i="3">
+      <div class="item-content">
+        <div class="item-tag">Unknown crowd</div>
+        <div class="item-title">What if you don't know them?</div>
+        <div class="item-body">Ask. Open with "Quick show of hands — who here has ever..." and tailor the rest on the fly. Improvisation is a design skill. The room will trust you more for asking than for assuming.</div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s2p3">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s2p3</div>
+          <div class="visual-label">Ask on the fly</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-item" data-sec="audience" data-i="4">
+      <div class="item-content">
+        <div class="item-tag">Language</div>
+        <div class="item-title">Use language they already use</div>
+        <div class="item-body">Tokens, component libraries, user journeys — whatever lives in their daily vocabulary. Shared language builds connection. Exclusive jargon builds walls. Never make them feel behind.</div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s2p4">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s2p4</div>
+          <div class="visual-label">Shared vocabulary</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-item" data-sec="audience" data-i="5">
+      <div class="item-content">
+        <div class="item-tag">Jargon</div>
+        <div class="item-title">Avoid the jargon trap</div>
+        <div class="item-body">If you're not sure they know a term, define it — briefly, without condescension. Reference designers and products they already respect to make abstract ideas concrete instantly.</div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s2p5">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s2p5</div>
+          <div class="visual-label">No jargon walls</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- INTERLUDE 3 -->
+<div class="interlude" style="background:#0F6E56;">
+  <div class="int-num">03</div>
+  <div class="int-word">Context</div>
+  <div class="int-sub">Don't assume they know the backstory. They don't.</div>
+</div>
+
+<!-- SECTION: CONTEXT & SCOPE -->
+<section class="scroll-section" id="s-frame" style="--sec-color: var(--teal);">
+  <div class="sticky-col">
+    <div class="sticky-label">Principle 02</div>
+    <h2 class="sticky-heading">Set the<br><em>context</em><br>&amp; scope</h2>
+    <div class="sticky-meta">
+      <div class="sticky-counter" id="ctr-frame">— / 3</div>
+      <div class="progress-track"><div class="progress-fill" id="pf-frame"></div></div>
+    </div>
+  </div>
+  <div class="items-col">
+
+    <div class="scroll-item" data-sec="frame" data-i="1">
+      <div class="item-content">
+        <div class="item-tag">The 5W1H</div>
+        <div class="item-title">What, Why, Who, Where, When, How</div>
+        <div class="fw-grid">
+          <div class="fw-cell"><div class="fw-letter" style="color:var(--teal)">W</div><div class="fw-word">What</div><div class="fw-hint">What are we talking about?</div></div>
+          <div class="fw-cell"><div class="fw-letter" style="color:var(--teal)">W</div><div class="fw-word">Why</div><div class="fw-hint">Why does it matter now?</div></div>
+          <div class="fw-cell"><div class="fw-letter" style="color:var(--teal)">H</div><div class="fw-word">How</div><div class="fw-hint">How did it come to be?</div></div>
+          <div class="fw-cell"><div class="fw-letter" style="color:var(--teal)">W</div><div class="fw-word">Who</div><div class="fw-hint">Who is affected?</div></div>
+          <div class="fw-cell"><div class="fw-letter" style="color:var(--teal)">W</div><div class="fw-word">Where</div><div class="fw-hint">Where does it live?</div></div>
+          <div class="fw-cell"><div class="fw-letter" style="color:var(--teal)">W</div><div class="fw-word">When</div><div class="fw-hint">What's the timeline?</div></div>
+        </div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s3p1">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s3p1</div>
+          <div class="visual-label">The 5W1H framework</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-item" data-sec="frame" data-i="2">
+      <div class="item-content">
+        <div class="item-tag">Scope</div>
+        <div class="item-title">Micro or macro — say it out loud</div>
+        <div class="item-body">Are you telling a micro story (one design decision) or a macro story (a full project arc)? Both are valid. Mixing them without signalling the shift confuses the room. Decide upfront and name it.</div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s3p2">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s3p2</div>
+          <div class="visual-label">Micro vs. macro</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-item" data-sec="frame" data-i="3">
+      <div class="item-content">
+        <div class="item-tag">Navigation</div>
+        <div class="item-title">Show the page count</div>
+        <div class="item-body">"Slide 4 of 12" gives people an anchor. They can reference back later: "Can we go to slide 3?" It tells them how much is left, reduces anxiety, and makes Q&amp;A far cleaner for everyone.</div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s3p3">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s3p3</div>
+          <div class="visual-label">Page count anchor</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- INTERLUDE 4 -->
+<div class="interlude" style="background:#BA7517;">
+  <div class="int-num">04</div>
+  <div class="int-word">Show it</div>
+  <div class="int-sub">A screenshot says more than a paragraph.</div>
+</div>
+
+<!-- SECTION: DELIVERY -->
+<section class="scroll-section" id="s-delivery" style="--sec-color: var(--amber);">
+  <div class="sticky-col">
+    <div class="sticky-label">Principle 03</div>
+    <h2 class="sticky-heading">Show,<br>don't<br><em>tell</em></h2>
+    <div class="sticky-meta">
+      <div class="sticky-counter" id="ctr-delivery">— / 3</div>
+      <div class="progress-track"><div class="progress-fill" id="pf-delivery"></div></div>
+    </div>
+  </div>
+  <div class="items-col">
+
+    <div class="scroll-item" data-sec="delivery" data-i="1">
+      <div class="item-content">
+        <div class="item-tag">The contrast</div>
+        <div class="item-title">Telling vs. showing</div>
+        <div class="versus-wrap">
+          <div class="vs-side"><div class="vs-lbl bad">Telling</div><ul class="vs-list"><li>The navigation was confusing</li><li>Users struggled to complete tasks</li><li>We improved the experience</li><li>The new design performs better</li></ul></div>
+          <div class="vs-divider-col"><span>VS</span></div>
+          <div class="vs-side"><div class="vs-lbl good">Showing</div><ul class="vs-list good"><li>Play the session recording where they get stuck</li><li>"73% couldn't find checkout on mobile"</li><li>Before and after side by side</li><li>CSAT up 18 points after launch</li></ul></div>
+        </div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s4p1">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s4p1</div>
+          <div class="visual-label">Tell vs. show</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-item" data-sec="delivery" data-i="2">
+      <div class="item-content">
+        <div class="item-tag">Format</div>
+        <div class="item-title">Choose your delivery format</div>
+        <div class="fmt-tabs">
+          <button class="ftab active" onclick="switchFmt(this,'fmt-demo')">Live demo</button>
+          <button class="ftab" onclick="switchFmt(this,'fmt-slides')">Slides</button>
+          <button class="ftab" onclick="switchFmt(this,'fmt-hybrid')">Hybrid</button>
+        </div>
+        <div id="fmt-demo" class="fmt-panel active">
+          <div class="fmt-point"><div class="fmt-dot"></div><div><div class="fmt-point-title">High engagement, high risk</div><div class="fmt-point-body">People lean in when it's live. Always have a backup.</div></div></div>
+          <div class="fmt-point"><div class="fmt-dot"></div><div><div class="fmt-point-title">If it breaks — keep moving</div><div class="fmt-point-body">"Let me show you this instead." Composure is the skill.</div></div></div>
+          <div class="fmt-point"><div class="fmt-dot"></div><div><div class="fmt-point-title">Narrate what you're doing</div><div class="fmt-point-body">People follow your voice, not your cursor.</div></div></div>
+        </div>
+        <div id="fmt-slides" class="fmt-panel">
+          <div class="fmt-point"><div class="fmt-dot"></div><div><div class="fmt-point-title">Slides are the backdrop</div><div class="fmt-point-body">You are the story. Dense slides compete with your voice.</div></div></div>
+          <div class="fmt-point"><div class="fmt-dot"></div><div><div class="fmt-point-title">Build to the reveal</div><div class="fmt-point-body">Establish the problem, let the tension sit, then show the solution.</div></div></div>
+        </div>
+        <div id="fmt-hybrid" class="fmt-panel">
+          <div class="fmt-point"><div class="fmt-dot"></div><div><div class="fmt-point-title">Context → live → debrief</div><div class="fmt-point-body">Structure without sacrificing spontaneity.</div></div></div>
+          <div class="fmt-point"><div class="fmt-dot"></div><div><div class="fmt-point-title">Signal every transition</div><div class="fmt-point-body">"I'm jumping into the product for a second."</div></div></div>
+        </div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s4p2">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s4p2</div>
+          <div class="visual-label">Delivery formats</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-item" data-sec="delivery" data-i="3">
+      <div class="item-content">
+        <div class="item-tag">Excitement</div>
+        <div class="item-title">Let them get excited</div>
+        <div class="item-body">Don't give away the end at the beginning. Establish the problem vividly. Let the tension sit. Then reveal. Pause after key moments — silence isn't awkward, it's emphasis. Designers know this from animation. Apply it to speaking.</div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s4p3">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s4p3</div>
+          <div class="visual-label">Build to the reveal</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- INTERLUDE 5 -->
+<div class="interlude" style="background:#993556;">
+  <div class="int-num">05</div>
+  <div class="int-word">Feel it</div>
+  <div class="int-sub">You think visually. Now think emotionally.</div>
+</div>
+
+<!-- SECTION: MOOD -->
+<section class="scroll-section" id="s-mood" style="--sec-color: var(--pink);">
+  <div class="sticky-col">
+    <div class="sticky-label">Principle 04</div>
+    <h2 class="sticky-heading">Lighten<br>the<br><em>mood</em></h2>
+    <div class="sticky-meta">
+      <div class="sticky-counter" id="ctr-mood">— / 4</div>
+      <div class="progress-track"><div class="progress-fill" id="pf-mood"></div></div>
+    </div>
+  </div>
+  <div class="items-col">
+
+    <div class="scroll-item" data-sec="mood" data-i="1">
+      <div class="item-content">
+        <div class="item-tag">Opening</div>
+        <div class="item-title">One light moment</div>
+        <div class="item-body">A funny quirk from the process, a relatable failure, or a clever observation. It disarms the room before the substance begins. Don't force it — the room will feel it either way.</div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s5p1">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s5p1</div>
+          <div class="visual-label">The opener</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-item" data-sec="mood" data-i="2">
+      <div class="item-content">
+        <div class="item-tag">Recovery</div>
+        <div class="item-title">What if the joke doesn't land?</div>
+        <div class="item-body">"I thought that was funnier in my head" — then move on. Owning it is more charming than explaining it. Never over-recover. Five seconds of acknowledgment, then continue.</div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s5p2">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s5p2</div>
+          <div class="visual-label">The recovery</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-item" data-sec="mood" data-i="3">
+      <div class="item-content">
+        <div class="item-tag">Cognitive load</div>
+        <div class="item-title">Don't make it a mental exercise</div>
+        <div class="item-body">If people are holding too many threads, simplify. Complexity is your problem to solve — not theirs to endure. A story should flow, not feel like a puzzle they're being asked to assemble.</div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s5p3">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s5p3</div>
+          <div class="visual-label">Keep it light</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-item is-quote" data-sec="mood" data-i="4">
+      <div class="item-content">
+        <div class="item-title">"Match the energy you want back. Designers read signal as fast as anyone."</div>
+        <div class="item-body">Vary your pace. Pause for effect. Invite a question. A curious audience is an engaged one.</div>
+      </div>
+      <div class="item-visual">
+        <div class="visual-placeholder" data-id="s5p4">
+          <div class="visual-icon"></div>
+          <div class="visual-id">s5p4</div>
+          <div class="visual-label">Energy match</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SECTION: CHECKLIST -->
+<section class="scroll-section" id="s-checklist" style="--sec-color: var(--teal); background: white;">
+  <div class="sticky-col">
+    <div class="sticky-label">Before you present</div>
+    <h2 class="sticky-heading">Pre-flight<br><em>checklist</em></h2>
+    <div class="sticky-meta">
+      <div class="sticky-counter" id="ctr-checklist">0 / 9 done</div>
+      <div class="progress-track"><div class="progress-fill" id="pf-checklist"></div></div>
+    </div>
+  </div>
+  <div class="items-col">
+    <div class="scroll-item" data-sec="checklist" data-i="1">
+      <div class="item-content" style="grid-column: 1 / -1;">
+        <div class="checklist-wrap" id="checklist-wrap">
+
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box-el">✓</div>
+          <div><div class="check-text-label">I know who's in the room</div>
+          <div class="check-text-sub">Background, expertise, what they care about</div></div>
+        </div>
+
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box-el">✓</div>
+          <div><div class="check-text-label">I've introduced myself with one relevant detail</div>
+          <div class="check-text-sub">Name + role + why this matters to me</div></div>
+        </div>
+
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box-el">✓</div>
+          <div><div class="check-text-label">My story has a clear source</div>
+          <div class="check-text-sub">Real project, lived experience, honest observation</div></div>
+        </div>
+
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box-el">✓</div>
+          <div><div class="check-text-label">I'm showing, not just telling</div>
+          <div class="check-text-sub">Visuals, data, screenshots, or a demo ready to go</div></div>
+        </div>
+
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box-el">✓</div>
+          <div><div class="check-text-label">I have a fallback if the demo breaks</div>
+          <div class="check-text-sub">Screenshots, prototype, or recorded walkthrough</div></div>
+        </div>
+
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box-el">✓</div>
+          <div><div class="check-text-label">Slides show the page count</div>
+          <div class="check-text-sub">So people can reference back during Q&amp;A</div></div>
+        </div>
+
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box-el">✓</div>
+          <div><div class="check-text-label">I've set context — What, Why, Who, Where, When, How</div>
+          <div class="check-text-sub">Don't assume they know the backstory</div></div>
+        </div>
+
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box-el">✓</div>
+          <div><div class="check-text-label">I have one moment to lighten the mood</div>
+          <div class="check-text-sub">A joke, an observation — with a recovery plan</div></div>
+        </div>
+
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box-el">✓</div>
+          <div><div class="check-text-label">One clear takeaway</div>
+          <div class="check-text-sub">What do I want them to walk away thinking or feeling?</div></div>
+        </div>
+
+        </div><!-- /.checklist-wrap -->
+      </div><!-- /.item-content -->
+    </div><!-- /.scroll-item -->
+  </div><!-- /.items-col -->
+</section>
+
+<!-- CLOSE -->
+<section id="close">
+  <div class="close-ring" style="width:460px;height:460px;"></div>
+  <div class="close-ring" style="width:740px;height:740px;"></div>
+  <div class="close-ring" style="width:1020px;height:1020px;"></div>
+  <h2 class="close-title">End with a<br><em>door open</em></h2>
+  <p class="close-sub">The best story doesn't end — it starts a conversation. Ask something you're genuinely curious about. Let the room answer.</p>
+</section>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* PROGRESS BAR */
+gsap.to('#progress-bar', {
+  width: '100%', ease: 'none',
+  scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: true }
+});
+
+/* NAV DOTS */
+const navDots = document.querySelectorAll('.nav-dot');
+navDots.forEach(dot => {
+  dot.addEventListener('click', () => {
+    const el = document.getElementById(dot.dataset.target);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+const navIds = ['hero','overview','s-intro','s-audience','s-frame','s-delivery','s-mood','s-checklist','close'];
+navIds.forEach((id, i) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  ScrollTrigger.create({
+    trigger: el, start: 'top 55%', end: 'bottom 45%',
+    onEnter:     () => navDots.forEach((d,j) => d.classList.toggle('active', j===i)),
+    onEnterBack: () => navDots.forEach((d,j) => d.classList.toggle('active', j===i)),
+  });
+});
+
+/* HERO */
+const htl = gsap.timeline({ delay: 0.15 });
+htl.to('.hero-tag',         { opacity:1, duration:0.6, ease:'power3.out' })
+   .to('.hero-title',       { opacity:1, y:0, duration:0.9, ease:'power3.out' }, '-=0.3')
+   .to('.hero-sub',         { opacity:1, duration:0.6, ease:'power3.out' }, '-=0.4')
+   .to('.hero-scroll-hint', { opacity:1, duration:0.5 }, '-=0.2');
+
+gsap.to('.hero-ring:nth-child(1)', { rotate:360,  duration:90,  repeat:-1, ease:'none', transformOrigin:'center center' });
+gsap.to('.hero-ring:nth-child(2)', { rotate:-360, duration:130, repeat:-1, ease:'none', transformOrigin:'center center' });
+
+/* ─────────────────────────────────────────
+   OVERVIEW CARD CAROUSEL — horizontal scroll
+   Cards fly in from the right, one per scroll step
+───────────────────────────────────────── */
+/* OVERVIEW CARDS — stagger in on scroll */
+(function() {
+  const header = document.getElementById('overviewHeader');
+  const cards  = gsap.utils.toArray('.chapter-card');
+
+  gsap.set(header, { opacity: 0, y: 16 });
+
+  ScrollTrigger.create({
+    trigger: '#overview',
+    start: 'top 75%',
+    onEnter: () => {
+      gsap.to(header, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' });
+      gsap.to(cards, {
+        opacity: 1, y: 0, duration: 0.55, ease: 'power3.out',
+        stagger: 0.07, delay: 0.2
+      });
+    },
+    onLeaveBack: () => {
+      gsap.to(header, { opacity: 0, y: 16, duration: 0.3 });
+      gsap.to(cards, { opacity: 0, y: 24, duration: 0.25, stagger: 0.04 });
+    }
+  });
+})();
+
+/* INTERLUDES */
+document.querySelectorAll('.interlude').forEach(el => {
+  const tl = gsap.timeline({ scrollTrigger: { trigger:el, start:'top 78%' } });
+  const num  = el.querySelector('.int-num');
+  const word = el.querySelector('.int-word');
+  const sub  = el.querySelector('.int-sub');
+  if (num)  tl.to(num,  { opacity:0.55, duration:0.4 });
+  if (word) tl.to(word, { opacity:1, y:0, duration:0.65, ease:'power3.out' }, '-=0.2');
+  if (sub)  tl.to(sub,  { opacity:1, duration:0.5 }, '-=0.2');
+});
+
+/* SCROLL ITEMS — reveal individually, slide back on scroll up */
+const secTotals = {};
+
+document.querySelectorAll('.scroll-item[data-sec]').forEach(item => {
+  const sec = item.dataset.sec;
+  const idx = parseInt(item.dataset.i);
+  secTotals[sec] = Math.max(secTotals[sec] || 0, idx);
+
+  const visual = item.querySelector('.item-visual');
+
+  ScrollTrigger.create({
+    trigger: item,
+    start: 'top 78%',
+    onEnter: () => {
+      gsap.to(item, { opacity:1, y:0, duration:0.7, ease:'power3.out' });
+      if (visual) gsap.to(visual.querySelector('.visual-placeholder'), {
+        opacity:1, scale:1, duration:0.6, ease:'power3.out', delay:0.15
+      });
+      updateCounter(sec, idx);
+    },
+    onLeaveBack: () => {
+      gsap.to(item, { opacity:0, y:48, duration:0.3, ease:'power2.in' });
+      if (visual) gsap.set(visual.querySelector('.visual-placeholder'), { opacity:0, scale:0.92 });
+      updateCounter(sec, idx - 1);
+    }
+  });
+});
+
+function updateCounter(sec, current) {
+  const ctr = document.getElementById('ctr-' + sec);
+  const pf  = document.getElementById('pf-' + sec);
+  if (!ctr || !pf) return;
+  const total = secTotals[sec] || 1;
+  const shown = Math.max(0, current);
+  if (sec === 'checklist') {
+    /* checklist counter handled by checkbox state */
+    return;
+  }
+  ctr.textContent = (shown > 0 ? shown : '—') + ' / ' + total;
+  pf.style.width  = (shown > 0 ? (shown / total * 100) : 0) + '%';
+}
+
+/* CLOSE */
+const cltl = gsap.timeline({ scrollTrigger: { trigger:'#close', start:'top 72%' } });
+cltl.to('.close-title', { opacity:1, y:0, duration:0.8, ease:'power3.out' })
+    .to('.close-sub',   { opacity:1, duration:0.6 }, '-=0.3');
+
+/* FORMAT SWITCHER */
+function switchFmt(btn, id) {
+  const item = btn.closest('.scroll-item');
+  item.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+  item.querySelectorAll('.fmt-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+/* CHECKLIST */
+function toggleCheck(el) {
+  el.classList.toggle('done');
+  const total = document.querySelectorAll('.check-item').length;
+  const done  = document.querySelectorAll('.check-item.done').length;
+  const ctr = document.getElementById('ctr-checklist');
+  const pf  = document.getElementById('pf-checklist');
+  if (ctr) ctr.textContent = done + ' / ' + total + ' done';
+  if (pf)  pf.style.width  = (done / total * 100) + '%';
+}
+</script>
+</body>
+</html>

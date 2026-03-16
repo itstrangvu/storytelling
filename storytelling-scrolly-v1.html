@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Art of Telling the Story</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream:   #F7F2E8;
+    --ink:     #1A1714;
+    --coral:   #D85A30;
+    --coral-l: #FAECE7;
+    --teal:    #0F6E56;
+    --teal-l:  #D8F0E9;
+    --purple:  #4A3FA0;
+    --purple-l:#EEEDFE;
+    --amber:   #BA7517;
+    --amber-l: #FEF3DC;
+    --pink:    #993556;
+    --pink-l:  #FBEAF0;
+    --blue:    #185FA5;
+    --blue-l:  #E6F1FB;
+    --serif:   'Playfair Display', Georgia, serif;
+    --sans:    'DM Sans', system-ui, sans-serif;
+    --mono:    'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── PROGRESS BAR ── */
+  #progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--coral);
+    width: 0%;
+    z-index: 999;
+    transition: width 0.1s linear;
+  }
+
+  /* ── CHAPTER NAV ── */
+  #chapter-nav {
+    position: fixed;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .nav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(26,23,20,0.2);
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+  }
+  .nav-dot.active { background: var(--coral); transform: scale(1.4); }
+  .nav-dot:hover { background: var(--ink); }
+  .nav-dot::before {
+    content: attr(data-label);
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--mono);
+    font-size: 10px;
+    white-space: nowrap;
+    color: var(--ink);
+    opacity: 0;
+    transition: opacity 0.2s;
+    background: var(--cream);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+  .nav-dot:hover::before { opacity: 1; }
+
+  /* ── SECTIONS ── */
+  section { position: relative; }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 80px 40px;
+    background: var(--ink);
+    overflow: hidden;
+  }
+
+  .hero-bg-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .hero-bg-ring:nth-child(1) { width: 600px; height: 600px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+  .hero-bg-ring:nth-child(2) { width: 900px; height: 900px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+  .hero-bg-ring:nth-child(3) { width: 1200px; height: 1200px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--coral);
+    margin-bottom: 24px;
+    opacity: 0;
+  }
+  .hero-title {
+    font-family: var(--serif);
+    font-size: clamp(52px, 9vw, 110px);
+    font-weight: 900;
+    line-height: 0.95;
+    color: var(--cream);
+    margin-bottom: 32px;
+    opacity: 0;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--coral);
+  }
+  .hero-sub {
+    font-size: 16px;
+    color: rgba(247,242,232,0.55);
+    max-width: 420px;
+    opacity: 0;
+    margin-bottom: 48px;
+    font-weight: 300;
+  }
+  .hero-scroll {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(247,242,232,0.3);
+    opacity: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .scroll-line {
+    width: 1px;
+    height: 48px;
+    background: rgba(247,242,232,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+  .scroll-line::after {
+    content: '';
+    position: absolute;
+    top: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--coral);
+    animation: scrolldown 1.8s ease infinite;
+  }
+  @keyframes scrolldown {
+    0% { top: -100%; }
+    100% { top: 200%; }
+  }
+
+  /* ── CHAPTER WRAPPER ── */
+  .chapter {
+    padding: 120px 40px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* ── CHAPTER LABEL ── */
+  .chapter-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--coral);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .chapter-label::after {
+    content: '';
+    flex: 1;
+    max-width: 60px;
+    height: 1px;
+    background: var(--coral);
+    opacity: 0.4;
+  }
+
+  /* ── CHAPTER TITLE ── */
+  .chapter-title {
+    font-family: var(--serif);
+    font-size: clamp(38px, 6vw, 68px);
+    font-weight: 700;
+    line-height: 1.05;
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  .chapter-title em { font-style: italic; }
+
+  /* ── DIVIDER ── */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: rgba(26,23,20,0.1);
+    margin: 0;
+  }
+
+  /* ── COLOR BAND ── */
+  .color-band {
+    padding: 100px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .color-band .chapter { padding: 0; }
+
+  /* ── PULL QUOTE ── */
+  .pull-quote {
+    font-family: var(--serif);
+    font-size: clamp(26px, 4vw, 42px);
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.25;
+    border-left: 4px solid var(--coral);
+    padding-left: 32px;
+    margin: 48px 0;
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  /* ── TIP CARDS ── */
+  .tips-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 40px;
+  }
+  @media (max-width: 640px) { .tips-grid { grid-template-columns: 1fr; } }
+
+  .tip-card {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    opacity: 0;
+    transform: translateY(40px);
+    position: relative;
+    overflow: hidden;
+  }
+  .tip-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--accent-color, var(--coral));
+  }
+  .tip-card-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--accent-color, var(--coral));
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .tip-card h3 {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .tip-card p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+  }
+
+  /* ── WIDE CARD ── */
+  .wide-card {
+    background: white;
+    border-radius: 16px;
+    padding: 32px 36px;
+    margin-top: 40px;
+    opacity: 0;
+    transform: translateY(40px);
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+  }
+  .wide-card-accent {
+    width: 4px;
+    border-radius: 2px;
+    background: var(--accent-color, var(--coral));
+    flex-shrink: 0;
+    align-self: stretch;
+    min-height: 48px;
+  }
+  .wide-card h3 {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .wide-card p { font-size: 15px; color: #444; line-height: 1.65; }
+
+  /* ── VERSUS ── */
+  .versus {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    background: white;
+    margin-top: 40px;
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  .vs-col { padding: 32px; }
+  .vs-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+  .vs-label.bad  { color: #999; }
+  .vs-label.good { color: var(--teal); }
+  .vs-divider-col {
+    width: 1px;
+    background: rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+    position: relative;
+  }
+  .vs-divider-col span {
+    background: white;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: #bbb;
+    padding: 6px 0;
+    writing-mode: vertical-lr;
+  }
+  .vs-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .vs-list li {
+    font-size: 14px;
+    color: #444;
+    padding-left: 16px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .vs-list li::before { content: '—'; position: absolute; left: 0; color: #ccc; }
+  .vs-list.good li::before { color: var(--teal); content: '✓'; }
+
+  /* ── 5W1H GRID ── */
+  .fw-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 40px;
+  }
+  @media (max-width: 640px) { .fw-grid { grid-template-columns: 1fr 1fr; } }
+  .fw-cell {
+    background: white;
+    border-radius: 12px;
+    padding: 22px 20px;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  .fw-letter {
+    font-family: var(--serif);
+    font-size: 40px;
+    font-weight: 900;
+    font-style: italic;
+    color: var(--coral);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .fw-word { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .fw-hint { font-size: 12px; color: #888; margin-top: 2px; }
+
+  /* ── FORMAT TOGGLE ── */
+  .format-area { margin-top: 40px; }
+  .format-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .ftab {
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1.5px solid rgba(26,23,20,0.15);
+    cursor: pointer;
+    background: transparent;
+    font-family: var(--sans);
+    color: var(--ink);
+    transition: all 0.2s;
+  }
+  .ftab.active, .ftab:hover { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+  .format-content { display: none; }
+  .format-content.active { display: block; }
+
+  /* ── CHECKLIST ── */
+  .checklist { display: flex; flex-direction: column; gap: 8px; margin-top: 40px; }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 18px;
+    background: white;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+    opacity: 0;
+    transform: translateX(-20px);
+    user-select: none;
+  }
+  .check-item:hover { background: #f9f5ef; }
+  .check-item.done { opacity: 0.5; }
+  .check-box-el {
+    width: 18px; height: 18px;
+    border-radius: 5px;
+    border: 1.5px solid rgba(26,23,20,0.25);
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    font-size: 11px;
+    color: white;
+  }
+  .check-item.done .check-box-el { background: var(--teal); border-color: var(--teal); }
+  .check-text-label { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .check-text-sub { font-size: 12px; color: #888; margin-top: 2px; line-height: 1.4; }
+
+  /* ── CLOSE SECTION ── */
+  #close {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 140px 40px;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+  }
+  #close .hero-bg-ring { border-color: rgba(255,255,255,0.04); }
+  .close-title {
+    font-family: var(--serif);
+    font-size: clamp(36px, 7vw, 80px);
+    font-weight: 900;
+    line-height: 1;
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  .close-title em { color: var(--coral); font-style: italic; }
+  .close-sub {
+    font-size: 16px;
+    color: rgba(247,242,232,0.5);
+    max-width: 460px;
+    margin: 24px auto 0;
+    opacity: 0;
+    font-weight: 300;
+  }
+
+  /* ── INTERLUDE ── */
+  .interlude {
+    background: var(--coral);
+    color: white;
+    text-align: center;
+    padding: 80px 40px;
+    overflow: hidden;
+  }
+  .interlude.teal   { background: var(--teal); }
+  .interlude.purple { background: var(--purple); }
+  .interlude.amber  { background: var(--amber); }
+
+  .interlude-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 16px;
+    opacity: 0;
+  }
+  .interlude-word {
+    font-family: var(--serif);
+    font-size: clamp(60px, 12vw, 140px);
+    font-weight: 900;
+    line-height: 0.9;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  .interlude-sub {
+    font-size: 15px;
+    opacity: 0;
+    margin-top: 20px;
+    font-weight: 300;
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── STORY ORIGIN ── */
+  .origin-list { display: flex; flex-direction: column; gap: 0; margin-top: 40px; }
+  .origin-item {
+    display: flex;
+    gap: 24px;
+    padding: 28px 0;
+    border-bottom: 1px solid rgba(26,23,20,0.08);
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .origin-item:last-child { border-bottom: none; }
+  .origin-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--coral);
+    flex-shrink: 0;
+    width: 28px;
+    padding-top: 3px;
+  }
+  .origin-title { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
+  .origin-body { font-size: 14px; color: #555; line-height: 1.6; }
+
+  /* ── BACKGROUND COLORS FOR SECTIONS ── */
+  .bg-cream   { background: var(--cream); }
+  .bg-white   { background: #ffffff; }
+  .bg-coral-l { background: var(--coral-l); }
+  .bg-teal-l  { background: var(--teal-l); }
+  .bg-purple-l{ background: var(--purple-l); }
+  .bg-amber-l { background: var(--amber-l); }
+  .bg-pink-l  { background: var(--pink-l); }
+  .bg-blue-l  { background: var(--blue-l); }
+
+  /* ── SCROLLYTELLING STICKY ── */
+  .sticky-section {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+  }
+  .sticky-left {
+    position: sticky;
+    top: 0;
+    width: 45%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 40px;
+  }
+  .sticky-right {
+    flex: 1;
+    padding: 80px 48px;
+  }
+  @media (max-width: 700px) {
+    .sticky-section { flex-direction: column; }
+    .sticky-left { position: relative; width: 100%; height: auto; padding: 40px 24px 0; }
+    .sticky-right { padding: 40px 24px; }
+  }
+
+  .sticky-visual {
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+  }
+  .sticky-big-letter {
+    font-family: var(--serif);
+    font-size: 180px;
+    font-weight: 900;
+    font-style: italic;
+    line-height: 1;
+    color: var(--accent-color, var(--coral));
+    opacity: 0.12;
+    user-select: none;
+    transition: all 0.5s ease;
+  }
+  .sticky-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-color, var(--coral));
+    margin-top: -20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── ACCENT COLORS PER SECTION ── */
+  #intro   { --accent-color: var(--coral); }
+  #audience{ --accent-color: var(--purple); }
+  #frame   { --accent-color: var(--teal); }
+  #delivery{ --accent-color: var(--amber); }
+  #mood    { --accent-color: var(--pink); }
+  #language{ --accent-color: var(--blue); }
+
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<nav id="chapter-nav">
+  <div class="nav-dot active" data-label="Start" data-target="hero"></div>
+  <div class="nav-dot" data-label="Yourself" data-target="intro"></div>
+  <div class="nav-dot" data-label="Audience" data-target="audience"></div>
+  <div class="nav-dot" data-label="Context" data-target="frame"></div>
+  <div class="nav-dot" data-label="Show it" data-target="delivery"></div>
+  <div class="nav-dot" data-label="Mood" data-target="mood"></div>
+  <div class="nav-dot" data-label="Language" data-target="language"></div>
+  <div class="nav-dot" data-label="Close" data-target="close"></div>
+</nav>
+
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-ring"></div>
+  <div class="hero-bg-ring"></div>
+  <div class="hero-bg-ring"></div>
+  <div class="hero-tag">Knowledge sharing · Peer designers</div>
+  <h1 class="hero-title">The art of<br><em>telling the story</em></h1>
+  <p class="hero-sub">Every design decision has a story behind it. Let's learn how to tell it in a way that actually lands.</p>
+  <div class="hero-scroll">
+    <span>Scroll to begin</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+
+<!-- INTERLUDE 1 -->
+<div class="interlude" id="int-intro">
+  <div class="interlude-num">01</div>
+  <div class="interlude-word">You</div>
+  <div class="interlude-sub">Before the story, there's a narrator. And that's you.</div>
+</div>
+
+
+<!-- INTRO: INTRODUCE YOURSELF -->
+<section id="intro" class="bg-cream">
+  <div class="chapter">
+    <div class="chapter-label">Before you begin</div>
+    <h2 class="chapter-title">Introduce<br><em>yourself first</em></h2>
+
+    <div class="pull-quote" style="border-color: var(--coral);">
+      "If they don't know you, they can't trust your story. Earn that trust in the first 30 seconds."
+    </div>
+
+    <div class="tips-grid">
+      <div class="tip-card" style="--accent-color: var(--coral);">
+        <div class="tip-card-num">Name + role</div>
+        <h3>One relevant detail</h3>
+        <p>Not your full résumé. Just enough to anchor where your perspective comes from. "I work on checkout flows and have shipped 3 redesigns in 2 years."</p>
+      </div>
+      <div class="tip-card" style="--accent-color: var(--coral);">
+        <div class="tip-card-num">Connect</div>
+        <h3>Why do you care?</h3>
+        <p>Briefly explain why storytelling matters to you. It signals authenticity and frames everything that's coming next.</p>
+      </div>
+      <div class="tip-card" style="--accent-color: var(--coral);">
+        <div class="tip-card-num">Source</div>
+        <h3>Where does the story come from?</h3>
+        <p>Real projects. Lived experience. Things that worked or didn't. The best stories have a source you can point to.</p>
+      </div>
+      <div class="tip-card" style="--accent-color: var(--coral);">
+        <div class="tip-card-num">Scope</div>
+        <h3>Set the expectations</h3>
+        <p>A micro story (one decision) or a macro story (full arc)? Signal the scope upfront. Mixing them without a transition loses the room.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- INTERLUDE 2 -->
+<div class="interlude teal" id="int-audience">
+  <div class="interlude-num">02</div>
+  <div class="interlude-word">Them</div>
+  <div class="interlude-sub">Your story lives in their heads. Design for it.</div>
+</div>
+
+
+<!-- AUDIENCE -->
+<section id="audience" class="bg-cream">
+  <div class="chapter">
+    <div class="chapter-label">Principle 01</div>
+    <h2 class="chapter-title" style="color: var(--purple);">Think about<br><em>your audience</em></h2>
+
+    <div class="origin-list">
+      <div class="origin-item">
+        <div class="origin-num" style="color: var(--purple);">01</div>
+        <div>
+          <div class="origin-title">What do they already know?</div>
+          <div class="origin-body">Their background and domain expertise shape how deep you can go from slide one. Don't explain Figma components to a room of senior product designers.</div>
+        </div>
+      </div>
+      <div class="origin-item">
+        <div class="origin-num" style="color: var(--purple);">02</div>
+        <div>
+          <div class="origin-title">Who do they admire?</div>
+          <div class="origin-body">Reference projects, designers, or products they respect. "Similar to how Linear approaches motion..." — abstract ideas become concrete instantly.</div>
+        </div>
+      </div>
+      <div class="origin-item">
+        <div class="origin-num" style="color: var(--purple);">03</div>
+        <div>
+          <div class="origin-title">What if you don't know them?</div>
+          <div class="origin-body">Ask. Open with "Quick show of hands — who here has..." and tailor the rest on the fly. Improvisation is a design skill too.</div>
+        </div>
+      </div>
+      <div class="origin-item">
+        <div class="origin-num" style="color: var(--purple);">04</div>
+        <div>
+          <div class="origin-title">Use language they already use</div>
+          <div class="origin-body">Tokens, component libraries, user journeys — use what lives in their daily vocabulary. Shared language builds connection. Exclusive jargon builds walls.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- INTERLUDE 3 -->
+<div class="interlude purple" id="int-frame">
+  <div class="interlude-num">03</div>
+  <div class="interlude-word">Context</div>
+  <div class="interlude-sub">Don't assume they know the backstory. They don't.</div>
+</div>
+
+
+<!-- FRAME: CONTEXT & SCOPE -->
+<section id="frame" class="bg-cream">
+  <div class="chapter">
+    <div class="chapter-label">Principle 02</div>
+    <h2 class="chapter-title" style="color: var(--teal);">Set the<br><em>context</em></h2>
+
+    <div class="fw-grid">
+      <div class="fw-cell">
+        <div class="fw-letter" style="color: var(--teal);">W</div>
+        <div class="fw-word">What</div>
+        <div class="fw-hint">What are we talking about?</div>
+      </div>
+      <div class="fw-cell">
+        <div class="fw-letter" style="color: var(--teal);">W</div>
+        <div class="fw-word">Why</div>
+        <div class="fw-hint">Why does it matter now?</div>
+      </div>
+      <div class="fw-cell">
+        <div class="fw-letter" style="color: var(--teal);">H</div>
+        <div class="fw-word">How</div>
+        <div class="fw-hint">How did it come to be?</div>
+      </div>
+      <div class="fw-cell">
+        <div class="fw-letter" style="color: var(--teal);">W</div>
+        <div class="fw-word">Who</div>
+        <div class="fw-hint">Who is affected?</div>
+      </div>
+      <div class="fw-cell">
+        <div class="fw-letter" style="color: var(--teal);">W</div>
+        <div class="fw-word">Where</div>
+        <div class="fw-hint">Where does this live?</div>
+      </div>
+      <div class="fw-cell">
+        <div class="fw-letter" style="color: var(--teal);">W</div>
+        <div class="fw-word">When</div>
+        <div class="fw-hint">What's the timeline?</div>
+      </div>
+    </div>
+
+    <div class="wide-card" style="--accent-color: var(--teal); margin-top: 32px;">
+      <div class="wide-card-accent"></div>
+      <div>
+        <h3>Show the page count</h3>
+        <p>"Slide 4 of 12" gives people an anchor. They can reference back later: "Can we go back to slide 3?" — it respects their attention and makes Q&A cleaner for everyone.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- INTERLUDE 4 -->
+<div class="interlude amber" id="int-delivery">
+  <div class="interlude-num">04</div>
+  <div class="interlude-word">Show it</div>
+  <div class="interlude-sub">A screenshot says more than a paragraph.</div>
+</div>
+
+
+<!-- DELIVERY: SHOW DON'T TELL + FORMATS -->
+<section id="delivery" class="bg-cream">
+  <div class="chapter">
+    <div class="chapter-label">Principle 03 & 04</div>
+    <h2 class="chapter-title" style="color: var(--amber);">Show, don't<br><em>tell</em></h2>
+
+    <div class="versus">
+      <div class="vs-col">
+        <div class="vs-label bad">Telling</div>
+        <ul class="vs-list">
+          <li>The navigation was confusing</li>
+          <li>Users struggled to complete tasks</li>
+          <li>We improved the experience</li>
+          <li>The new design performs better</li>
+        </ul>
+      </div>
+      <div class="vs-divider-col"><span>VS</span></div>
+      <div class="vs-col">
+        <div class="vs-label good">Showing</div>
+        <ul class="vs-list good">
+          <li>Play the session recording where they get stuck</li>
+          <li>"73% couldn't find checkout on mobile"</li>
+          <li>Before and after side by side</li>
+          <li>CSAT up 18 points after launch</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="format-area">
+      <div class="format-tabs">
+        <button class="ftab active" onclick="switchFmt(this,'fmt-demo')">Live demo</button>
+        <button class="ftab" onclick="switchFmt(this,'fmt-slides')">Slides</button>
+        <button class="ftab" onclick="switchFmt(this,'fmt-hybrid')">Hybrid</button>
+      </div>
+
+      <div id="fmt-demo" class="format-content active">
+        <div class="tips-grid">
+          <div class="tip-card" style="--accent-color: var(--amber); opacity: 1; transform: none;">
+            <div class="tip-card-num">High risk</div>
+            <h3>High engagement</h3>
+            <p>People lean in when it's live. But always have a backup — a recorded walkthrough or a clickable prototype.</p>
+          </div>
+          <div class="tip-card" style="--accent-color: var(--amber); opacity: 1; transform: none;">
+            <div class="tip-card-num">If it breaks</div>
+            <h3>Keep moving</h3>
+            <p>"Let me show you this instead" — then continue. Never apologise for more than five seconds. Composure is the skill.</p>
+          </div>
+        </div>
+      </div>
+      <div id="fmt-slides" class="format-content">
+        <div class="tips-grid">
+          <div class="tip-card" style="--accent-color: var(--amber); opacity: 1; transform: none;">
+            <div class="tip-card-num">Structure</div>
+            <h3>Slides are the backdrop</h3>
+            <p>You are the story. Dense slides compete with your voice — and they always win badly.</p>
+          </div>
+          <div class="tip-card" style="--accent-color: var(--amber); opacity: 1; transform: none;">
+            <div class="tip-card-num">Reveal</div>
+            <h3>Build to the punchline</h3>
+            <p>Don't front-load the answer. Establish the problem vividly, let the tension sit, then show the solution.</p>
+          </div>
+        </div>
+      </div>
+      <div id="fmt-hybrid" class="format-content">
+        <div class="wide-card" style="--accent-color: var(--amber); opacity: 1; transform: none; margin-top: 0;">
+          <div class="wide-card-accent"></div>
+          <div>
+            <h3>Context → live → debrief</h3>
+            <p>Set up the story in slides, demonstrate it live, then return to slides to reflect. Structure without sacrificing spontaneity. Signal transitions out loud: "I'm going to jump into the product for a second."</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- INTERLUDE 5 -->
+<div class="interlude" style="background: var(--pink);" id="int-mood">
+  <div class="interlude-num">05</div>
+  <div class="interlude-word">Feel it</div>
+  <div class="interlude-sub">You already think visually. Now think emotionally.</div>
+</div>
+
+
+<!-- MOOD -->
+<section id="mood" class="bg-cream">
+  <div class="chapter">
+    <div class="chapter-label">Principle 05</div>
+    <h2 class="chapter-title" style="color: var(--pink);">Lighten<br><em>the mood</em></h2>
+
+    <div class="pull-quote" style="border-color: var(--pink);">
+      "Match the energy you want back. This is a room of designers — they read signal as fast as anyone."
+    </div>
+
+    <div class="tips-grid">
+      <div class="tip-card" style="--accent-color: var(--pink);">
+        <div class="tip-card-num">Open</div>
+        <h3>One light moment</h3>
+        <p>A funny quirk from the process, a relatable fail, or a clever observation. It disarms the room before the substance begins.</p>
+      </div>
+      <div class="tip-card" style="--accent-color: var(--pink);">
+        <div class="tip-card-num">Recovery</div>
+        <h3>If the joke doesn't land</h3>
+        <p>"I thought that was funnier in my head" — then move on. Owning it is more charming than explaining it. Never over-recover.</p>
+      </div>
+      <div class="tip-card" style="--accent-color: var(--pink);">
+        <div class="tip-card-num">Cognitive load</div>
+        <h3>Don't make it a mental exercise</h3>
+        <p>Complexity is your problem to solve, not theirs to endure. If they're holding too many threads at once, simplify.</p>
+      </div>
+      <div class="tip-card" style="--accent-color: var(--pink);">
+        <div class="tip-card-num">Excitement</div>
+        <h3>Let them get excited</h3>
+        <p>Vary your pace. Pause for effect. Raise an eyebrow. Invite a question mid-way. A curious audience is an engaged audience.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- INTERLUDE 6 -->
+<div class="interlude" style="background: var(--blue);" id="int-language">
+  <div class="interlude-num">06</div>
+  <div class="interlude-word">Words</div>
+  <div class="interlude-sub">The best storytellers don't show off their vocabulary. They borrow yours.</div>
+</div>
+
+
+<!-- LANGUAGE -->
+<section id="language" class="bg-cream">
+  <div class="chapter">
+    <div class="chapter-label">Principle 06</div>
+    <h2 class="chapter-title" style="color: var(--blue);">Speak their<br><em>language</em></h2>
+
+    <div class="origin-list">
+      <div class="origin-item">
+        <div class="origin-num" style="color: var(--blue);">→</div>
+        <div>
+          <div class="origin-title">Use terms they already use</div>
+          <div class="origin-body">Figma, design tokens, component libraries, user journeys — whatever lives in their daily vocabulary. It signals you're one of them.</div>
+        </div>
+      </div>
+      <div class="origin-item">
+        <div class="origin-num" style="color: var(--blue);">→</div>
+        <div>
+          <div class="origin-title">Reference designers they admire</div>
+          <div class="origin-body">"Similar to how Linear approaches motion..." or "Like the Duolingo team does with empty states..." Abstract ideas become concrete fast when grounded in work they know.</div>
+        </div>
+      </div>
+      <div class="origin-item">
+        <div class="origin-num" style="color: var(--blue);">→</div>
+        <div>
+          <div class="origin-title">Avoid the jargon trap</div>
+          <div class="origin-body">If you're not sure they know a term, define it briefly, without condescension. Shared language builds connection. Exclusive jargon builds walls.</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="chapter-title" style="color: var(--blue); margin-top: 80px;">Your<br><em>pre-flight checklist</em></h2>
+
+    <div class="checklist">
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box-el">✓</div>
+        <div><div class="check-text-label">I know who's in the room</div><div class="check-text-sub">Background, expertise, what they care about</div></div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box-el">✓</div>
+        <div><div class="check-text-label">I've introduced myself with one relevant detail</div><div class="check-text-sub">Name + role + why this matters to you</div></div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box-el">✓</div>
+        <div><div class="check-text-label">My story has a clear source</div><div class="check-text-sub">Real project, lived experience, honest observation</div></div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box-el">✓</div>
+        <div><div class="check-text-label">I'm showing, not just telling</div><div class="check-text-sub">Visuals, data, screenshots, or a demo ready to go</div></div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box-el">✓</div>
+        <div><div class="check-text-label">I have a fallback if the demo breaks</div><div class="check-text-sub">Screenshots, prototype, or recorded walkthrough</div></div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box-el">✓</div>
+        <div><div class="check-text-label">Slides show the page count</div><div class="check-text-sub">So people can reference back later</div></div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box-el">✓</div>
+        <div><div class="check-text-label">I've set context — What, Why, Who, Where, When, How</div><div class="check-text-sub">Don't assume they know the backstory</div></div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box-el">✓</div>
+        <div><div class="check-text-label">I have one moment to lighten the mood</div><div class="check-text-sub">A joke, an observation, something real — with a recovery plan</div></div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box-el">✓</div>
+        <div><div class="check-text-label">One clear takeaway</div><div class="check-text-sub">What do I want them to walk away thinking or feeling?</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- CLOSE -->
+<section id="close">
+  <div class="hero-bg-ring"></div>
+  <div class="hero-bg-ring"></div>
+  <div class="hero-bg-ring"></div>
+  <div style="position: relative; z-index: 1; max-width: 700px; margin: 0 auto; text-align: center;">
+    <div class="hero-tag" style="justify-content: center; margin-bottom: 32px;">The closing</div>
+    <h2 class="close-title">End with a<br><em>door open</em></h2>
+    <p class="close-sub">The best story doesn't end — it starts a conversation. Ask something you're genuinely curious about. Let the room answer.</p>
+  </div>
+</section>
+
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* PROGRESS BAR */
+gsap.to('#progress-bar', {
+  width: '100%',
+  ease: 'none',
+  scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: true }
+});
+
+/* NAV DOTS */
+const navDots = document.querySelectorAll('.nav-dot');
+navDots.forEach(dot => {
+  dot.addEventListener('click', () => {
+    const target = document.getElementById(dot.dataset.target);
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+const sections = ['hero','intro','audience','frame','delivery','mood','language','close'];
+sections.forEach((id, i) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  ScrollTrigger.create({
+    trigger: el,
+    start: 'top 60%',
+    end: 'bottom 40%',
+    onEnter: () => setActiveNav(i),
+    onEnterBack: () => setActiveNav(i),
+  });
+});
+function setActiveNav(i) {
+  navDots.forEach((d, j) => d.classList.toggle('active', j === i));
+}
+
+/* HERO ANIMATIONS */
+const tl = gsap.timeline({ delay: 0.2 });
+tl.to('.hero-tag',    { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' })
+  .to('.hero-title',  { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' }, '-=0.4')
+  .to('.hero-sub',    { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, '-=0.5')
+  .to('.hero-scroll', { opacity: 1, duration: 0.6 }, '-=0.3');
+
+/* INTERLUDE ANIMATIONS */
+document.querySelectorAll('.interlude').forEach(el => {
+  const num  = el.querySelector('.interlude-num');
+  const word = el.querySelector('.interlude-word');
+  const sub  = el.querySelector('.interlude-sub');
+  const stl = gsap.timeline({ scrollTrigger: { trigger: el, start: 'top 75%' } });
+  if (num)  stl.to(num,  { opacity: 0.6, duration: 0.5 });
+  if (word) stl.to(word, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, '-=0.3');
+  if (sub)  stl.to(sub,  { opacity: 0.75, duration: 0.6 }, '-=0.3');
+});
+
+/* CHAPTER LABELS & TITLES */
+document.querySelectorAll('.chapter-label').forEach(el => {
+  gsap.to(el, {
+    opacity: 1, y: 0, duration: 0.6, ease: 'power3.out',
+    scrollTrigger: { trigger: el, start: 'top 85%' }
+  });
+});
+document.querySelectorAll('.chapter-title').forEach(el => {
+  gsap.to(el, {
+    opacity: 1, y: 0, duration: 0.8, ease: 'power3.out',
+    scrollTrigger: { trigger: el, start: 'top 85%' }
+  });
+});
+
+/* PULL QUOTES */
+document.querySelectorAll('.pull-quote').forEach(el => {
+  gsap.to(el, {
+    opacity: 1, x: 0, duration: 0.7, ease: 'power3.out',
+    scrollTrigger: { trigger: el, start: 'top 85%' }
+  });
+});
+
+/* TIP CARDS */
+document.querySelectorAll('.tip-card').forEach((el, i) => {
+  gsap.to(el, {
+    opacity: 1, y: 0, duration: 0.6, ease: 'power3.out',
+    delay: (i % 2) * 0.12,
+    scrollTrigger: { trigger: el, start: 'top 88%' }
+  });
+});
+
+/* WIDE CARDS */
+document.querySelectorAll('.wide-card').forEach(el => {
+  gsap.to(el, {
+    opacity: 1, y: 0, duration: 0.6, ease: 'power3.out',
+    scrollTrigger: { trigger: el, start: 'top 88%' }
+  });
+});
+
+/* VERSUS */
+document.querySelectorAll('.versus').forEach(el => {
+  gsap.to(el, {
+    opacity: 1, y: 0, duration: 0.7, ease: 'power3.out',
+    scrollTrigger: { trigger: el, start: 'top 85%' }
+  });
+});
+
+/* 5W1H CELLS */
+document.querySelectorAll('.fw-cell').forEach((el, i) => {
+  gsap.to(el, {
+    opacity: 1, y: 0, duration: 0.5, ease: 'power3.out',
+    delay: i * 0.07,
+    scrollTrigger: { trigger: el, start: 'top 90%' }
+  });
+});
+
+/* ORIGIN ITEMS */
+document.querySelectorAll('.origin-item').forEach((el, i) => {
+  gsap.to(el, {
+    opacity: 1, y: 0, duration: 0.5, ease: 'power3.out',
+    delay: i * 0.08,
+    scrollTrigger: { trigger: el, start: 'top 88%' }
+  });
+});
+
+/* CHECKLIST ITEMS */
+document.querySelectorAll('.check-item').forEach((el, i) => {
+  gsap.to(el, {
+    opacity: 1, x: 0, duration: 0.45, ease: 'power3.out',
+    delay: i * 0.06,
+    scrollTrigger: { trigger: el, start: 'top 90%' }
+  });
+});
+
+/* FORMAT TABS */
+document.querySelectorAll('.format-tabs').forEach(el => {
+  gsap.to(el, {
+    opacity: 1, y: 0, duration: 0.5, ease: 'power3.out',
+    scrollTrigger: { trigger: el, start: 'top 88%' }
+  });
+});
+
+/* CLOSE SECTION */
+const closeTl = gsap.timeline({ scrollTrigger: { trigger: '#close', start: 'top 70%' } });
+closeTl.to('.close-title', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' })
+       .to('.close-sub',   { opacity: 1, duration: 0.6 }, '-=0.3');
+
+/* HERO PARALLAX RINGS */
+gsap.to('.hero-bg-ring:nth-child(1)', {
+  rotate: 360, duration: 80, repeat: -1, ease: 'none', transformOrigin: 'center center'
+});
+gsap.to('.hero-bg-ring:nth-child(2)', {
+  rotate: -360, duration: 120, repeat: -1, ease: 'none', transformOrigin: 'center center'
+});
+
+/* FORMAT SWITCHER */
+function switchFmt(btn, targetId) {
+  document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.format-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(targetId).classList.add('active');
+}
+
+/* CHECKLIST TOGGLE */
+function toggleCheck(el) {
+  el.classList.toggle('done');
+}
+</script>
+</body>
+</html>
