@@ -333,77 +333,27 @@ body {
 /* ── Visual half (col 9–12 effectively) ── */
 .item-visual {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 48px 40px;
-  background: rgba(26,23,20,0.025);
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 16px 20px;
   position: relative;
   overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-color: rgba(26,23,20,0.06);
 }
 
-/* Visual placeholder card */
-.visual-placeholder {
-  width: 100%;
-  max-width: 280px;
-  aspect-ratio: 3/4;
-  border-radius: 16px;
-  background: white;
-  border: 1px solid rgba(26,23,20,0.08);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  position: relative;
-  overflow: hidden;
-  opacity: 0;
-  transform: scale(0.92);
-}
-.visual-placeholder::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, var(--sec-color, var(--coral)) 0%, transparent 60%);
-  opacity: 0.06;
-}
 .visual-id {
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--sec-color, var(--coral));
-  position: relative;
-  z-index: 1;
-}
-.visual-label {
-  font-family: var(--serif);
-  font-size: 13px;
-  font-weight: 600;
-  font-style: italic;
-  color: rgba(26,23,20,0.35);
-  text-align: center;
-  padding: 0 16px;
-  line-height: 1.4;
-  position: relative;
-  z-index: 1;
-}
-.visual-icon {
-  width: 48px; height: 48px;
-  border-radius: 50%;
-  background: var(--sec-color, var(--coral));
-  opacity: 0.12;
-  position: relative;
-  z-index: 1;
-}
-/* Corner tag */
-.visual-placeholder::after {
-  content: attr(data-id);
-  position: absolute;
-  bottom: 12px; right: 14px;
-  font-family: var(--mono);
   font-size: 9px;
-  letter-spacing: 0.1em;
-  color: rgba(26,23,20,0.2);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+  background: rgba(0,0,0,0.35);
+  padding: 3px 7px;
+  border-radius: 3px;
+  position: relative;
+  z-index: 1;
 }
 
 /* Versus */
